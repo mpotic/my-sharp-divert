@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "MySharpDivert": {
+      "commandName": "Project",
+      "nativeDebugging": true
+    }
+  }
+}
