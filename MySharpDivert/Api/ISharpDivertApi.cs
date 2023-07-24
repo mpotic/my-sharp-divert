@@ -1,4 +1,6 @@
-﻿namespace MySharpDivert
+﻿using MySharpDivert.Native;
+
+namespace MySharpDivert
 {
     public interface ISharpDivertApi
 	{
@@ -6,8 +8,6 @@
 
 		IReceiveResponse ReceiveSinglePacket();
 
-		IResponse SharpDivertSend();
-
-		IResponse SharpDivertClose();
+		IResponse SharpDivertSend(byte[] packet, WinDivertAddress address);
 	}
 }

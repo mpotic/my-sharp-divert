@@ -1,4 +1,5 @@
-﻿using System;
+﻿using MySharpDivert.Native;
+using System;
 
 namespace MySharpDivert
 {
@@ -15,19 +16,16 @@ namespace MySharpDivert
 
 		public IReceiveResponse ReceiveSinglePacket()
 		{
-			IReceiveResponse receiveResponse = handler.ReceiveSinglePacket();
+			IReceiveResponse receiveResponse = handler.ReceivePacket();
 
 			return receiveResponse;
 		}
 
-		public IResponse SharpDivertSend()
+		public IResponse SharpDivertSend(byte[] packet, WinDivertAddress address)
 		{
-			throw new NotImplementedException();
-		}
+			IResponse response = handler.SendPacket(packet, address);
 
-		public IResponse SharpDivertClose()
-		{
-			throw new NotImplementedException();
+			return response;
 		}
 	}
 }

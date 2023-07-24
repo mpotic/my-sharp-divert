@@ -28,5 +28,21 @@ namespace MySharpDivert.Native
 		public ulong UDPChecksum;
 
 		public UnionData Union;
+
+		public override string ToString()
+		{
+			return $"WinDivertAddress:\n" +
+			   $"  Timestamp: {Timestamp}\n" +
+			   $"  Layer: {Layer}\n" +
+			   $"  Event: {Event}\n" +
+			   $"  Sniffed: {Sniffed}\n" +
+			   $"  Outbound: {Outbound}\n" +
+			   $"  Loopback: {Loopback}\n" +
+			   $"  Impostor: {Impostor}\n" +
+			   $"  IPv6: {IPv6}\n" +
+			   $"  IPChecksum: {IPChecksum}\n" +
+			   $"  TCPChecksum: {TCPChecksum}\n" +
+			   $"  UDPChecksum: {UDPChecksum}\n";
+		}
 	}
 }

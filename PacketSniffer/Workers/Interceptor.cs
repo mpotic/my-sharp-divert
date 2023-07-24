@@ -19,23 +19,30 @@ namespace PacketSniffer
 
 		public void InterceptAndForward()
 		{
-			Open();
-			Console.WriteLine("Intercepting started...");
-			StartIntercepting();
-        }
-
-		private void Open()
-		{
-			try
+			if (!Open())
 			{
-				sharpDivert.Open("tcp.SrcPort == 21000 || tcp.SrcPort == 21001");
-			}
-			catch (Exception e)
-			{
-				Console.WriteLine("Exception: " + e.Message);
-
 				return;
 			}
+
+			Console.WriteLine("Intercepting started...");
+			StartIntercepting();
+		}
+
+		private bool Open()
+		{
+			string portsFilter = "(tcp.SrcPort == 22000 or tcp.SrcPort == 22001)";
+			string connectFilter = "tcp.PayloadLength > 0";
+			string filter = portsFilter + " and " + connectFilter;
+			
+			IResponse response = sharpDivert.Open(filter);
+			if (!response.IsSuccessful)
+			{
+				Console.WriteLine("Failed: " + response.ErrorMessage);
+
+				return false;
+			}
+
+			return true;
 		}
 
 		private bool StartIntercepting()
@@ -48,9 +55,9 @@ namespace PacketSniffer
 				try
 				{
 					message = sharpDivert.ReceiveSinglePacket();
-					Console.WriteLine("Message received: " + message.ToString());
-				}
-				catch(Exception e)
+					ProcessPacket(message);
+                }
+				catch (Exception e)
 				{
 					Console.WriteLine(e.Message);
 					isIntercepting = WorkerStatus.Inactive;
@@ -62,6 +69,14 @@ namespace PacketSniffer
 			isIntercepting = WorkerStatus.Inactive;
 
 			return true;
+		}
+
+		private void ProcessPacket(IReceiveResponse packet)
+		{
+			IMessage message = new Message(packet);
+			Console.WriteLine(message);
+
+			sharpDivert.SharpDivertSend(message.Packet, message.Address);
 		}
 
 		public void StopIntercepting()

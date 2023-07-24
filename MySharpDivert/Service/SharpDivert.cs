@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Runtime.InteropServices;
 using MySharpDivert.Native;
 
@@ -37,10 +38,10 @@ namespace MySharpDivert
 			return response;
 		}
 
-		public IReceiveResponse ReceiveSinglePacket()
+		public IReceiveResponse ReceivePacket()
 		{
 			IReceiveResponse response;
-			bool isSuccessful; 
+			bool isSuccessful;
 			uint allowedPacketLen = 8192;
 			IntPtr packetBuffer = Marshal.AllocHGlobal((int)allowedPacketLen);
 			uint receivedPacketLength = 0;
@@ -83,6 +84,44 @@ namespace MySharpDivert
 			{
 				WinDivertImports.WinDivertClose(handle);
 			}
+		}
+
+		public IResponse SendPacket(byte[] packet, WinDivertAddress address)
+		{
+			IResponse response;
+			bool isSuccessful;
+			IntPtr packetPtr = Marshal.AllocHGlobal(packet.Length);
+			Marshal.Copy(packet, 0, packetPtr, packet.Length);
+			uint writeLength = 0;
+
+			try
+			{
+				isSuccessful = WinDivertImports.WinDivertSend(
+					handle,
+					packetPtr,
+					(uint)packet.Length,
+					ref address,
+					ref writeLength
+				);
+			}
+			catch (Exception e)
+			{
+				response = new Response(false, e.Message);
+
+				return response;
+			}
+
+			if (!isSuccessful)
+			{
+				response = new Response(isSuccessful, helper.GetLastErrorMessage());
+
+				return response;
+			}
+
+			response = new Response(isSuccessful);
+			Marshal.FreeHGlobal(packetPtr);
+
+			return response;
 		}
 
 		~SharpDivert()
