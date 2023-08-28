@@ -7,8 +7,6 @@ namespace MySharpDivert
 		/// <summary>
 		/// Opens a connection with specified filter, making a handle.
 		/// </summary>
-		/// <param name="filter"></param>
-		/// <returns></returns>
 		IResponse Open(string filter);
 
 		/// <summary>
@@ -17,7 +15,9 @@ namespace MySharpDivert
 		IReceiveResponse ReceivePacket();
 
 		IResponse SendPacket(byte[] packet, WinDivertAddress address);
+		
+		IResponse ShutdownHandle();
 
-		void CloseHandle();
+		IResponse CloseHandle();
 	}
 }

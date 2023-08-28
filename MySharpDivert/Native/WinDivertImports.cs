@@ -1,4 +1,5 @@
-﻿using System;
+﻿using MySharpDivert.Native.Enums;
+using System;
 using System.Runtime.InteropServices;
 
 namespace MySharpDivert.Native
@@ -18,11 +19,11 @@ namespace MySharpDivert.Native
 		[DllImport(WIN_DIVERT_PATH, EntryPoint = "WinDivertRecv", CallingConvention = CallingConvention.Cdecl, SetLastError = true)]
 		[return: MarshalAs(UnmanagedType.Bool)]
 		public static extern bool WinDivertRecv(
-			[In()] IntPtr handle, 
-			IntPtr pPacket,
-			uint packetLen,
-			ref uint readLen,
-			[In()] ref WinDivertAddress pAddr
+			[In()] IntPtr handle,
+			[Out()][Optional] IntPtr pPacket,
+			[In()] uint packetLen,
+			[Out()][Optional] out uint readLen,
+			[Out()][Optional] out WinDivertAddress pAddr
 		);
 
 		[DllImport(WIN_DIVERT_PATH, EntryPoint = "WinDivertSend", CallingConvention = CallingConvention.Cdecl, SetLastError = true)]
@@ -30,10 +31,14 @@ namespace MySharpDivert.Native
 		public static extern bool WinDivertSend(
 			[In()] IntPtr handle,
 			[In()] IntPtr pPacket,
-			uint packetLen,
-			[In()] ref WinDivertAddress pAddr,
-			ref uint writeLen
+			[In()] uint packetLen,
+			[Out()][Optional] out uint sendLen,
+			[In()] ref WinDivertAddress pAddr
 		);
+
+		[DllImport(WIN_DIVERT_PATH, EntryPoint = "WinDivertShutdown", CallingConvention = CallingConvention.Cdecl, SetLastError = true)]
+		[return: MarshalAs(UnmanagedType.Bool)]
+		public static extern bool WinDivertShutdown([In()] IntPtr handle, [In()] WinDivertShutdown how);
 
 		[DllImport(WIN_DIVERT_PATH, EntryPoint = "WinDivertClose", CallingConvention = CallingConvention.Cdecl, SetLastError = true)]
 		[return: MarshalAs(UnmanagedType.Bool)]

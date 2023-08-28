@@ -2,10 +2,8 @@
 {
 	internal interface IInterceptor
 	{
-		void InterceptAndForward();
+		void InterceptAndForward(string filter);
 
 		void StopIntercepting();
-
-		void InterceptAndAddToQueue();
 	}
 }

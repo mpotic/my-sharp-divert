@@ -21,24 +21,6 @@ namespace MySharpDivert
 			return GetPacket(packetPtr, length);
 		}
 
-		internal byte[] PayloadFromPacket(IntPtr packetPtr, uint packetLength)
-		{
-			int tcpHeaderLengthOffset = 20;
-			byte[] payload = new byte[packetLength - tcpHeaderLengthOffset];
-			byte[] packetData = GetPacket(packetPtr, packetLength);
-
-			Array.Copy(packetData, tcpHeaderLengthOffset, payload, 0, payload.Length);
-
-			return payload;
-		}
-
-		internal byte[] PayloadFromPacket(IntPtr packetPtr, IntPtr packetLength)
-		{
-			uint length = (uint)Marshal.ReadInt32(packetPtr);
-
-			return PayloadFromPacket(packetPtr, length);
-		}
-
 		internal string GetLastErrorMessage()
 		{
 			var exceptionHandler = new Win32Exception(Marshal.GetLastWin32Error());

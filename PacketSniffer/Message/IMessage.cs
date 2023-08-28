@@ -1,6 +1,5 @@
 ﻿using MySharpDivert.Native;
 using PacketSniffer.Enums;
-using System;
 
 namespace PacketSniffer
 {

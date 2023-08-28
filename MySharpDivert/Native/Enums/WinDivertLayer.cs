@@ -2,10 +2,10 @@
 {
 	public enum WinDivertLayer : int
 	{
-		Network = 0,
-		Forward,
-		Flow,
-		Socket,
-		Reflect
+		WINDIVERT_LAYER_NETWORK = 0,
+		WINDIVERT_LAYER_NETWORK_FORWARD,
+		WINDIVERT_LAYER_FLOW,
+		WINDIVERT_LAYER_SOCKET,
+		WINDIVERT_LAYER_REFLECT,
 	}
 }

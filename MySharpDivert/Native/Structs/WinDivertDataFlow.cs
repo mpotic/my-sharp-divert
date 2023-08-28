@@ -11,13 +11,21 @@ namespace MySharpDivert.Native
 
 		public uint ProcessId;
 
-		[MarshalAs(UnmanagedType.ByValArray, SizeConst = 4)]
+		public uint LocalAddr_0;
 
-		public uint[] LocalAddr;
+		public uint LocalAddr_1;
+		
+		public uint LocalAddr_2;
+		
+		public uint LocalAddr_3;
 
-		[MarshalAs(UnmanagedType.ByValArray, SizeConst = 4)]
+		public uint RemoteAddr_0;
 
-		public uint[] RemoteAddr;
+		public uint RemoteAddr_1;
+
+		public uint RemoteAddr_2;
+
+		public uint RemoteAddr_3;
 
 		public ushort LocalPort;
 

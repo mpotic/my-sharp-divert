@@ -2,7 +2,6 @@
 using PacketSniffer.Enums;
 using System;
 using System.Threading;
-using System.Threading.Tasks;
 
 namespace PacketSniffer
 {
@@ -10,29 +9,45 @@ namespace PacketSniffer
 	{
 		ISharpDivertApi sharpDivert;
 
-		WorkerStatus isIntercepting = WorkerStatus.Inactive;
+		WorkerStatus status = WorkerStatus.Inactive;
+
+		string exceptionMessage;
 
 		public Interceptor(ISharpDivertApi sharpDivert)
 		{
 			this.sharpDivert = sharpDivert;
 		}
 
-		public void InterceptAndForward()
+		public void InterceptAndForward(string filter)
 		{
-			if (!Open())
+			if(status != WorkerStatus.Inactive)
+			{
+                Console.WriteLine("Already intercepting!");
+
+                return;
+			}
+
+			if (!Open(filter))
 			{
 				return;
 			}
 
-			Console.WriteLine("Intercepting started...");
-			StartIntercepting();
+			Console.WriteLine("Intercepting started.");
+
+			if (StartIntercepting())
+			{
+				Console.WriteLine("Intercepting stopped.");
+			}
+			else
+			{
+				Console.WriteLine("Intercepting terminated! " + exceptionMessage);
+			}
 		}
 
-		private bool Open()
+		private bool Open(string userFilter)
 		{
-			string portsFilter = "(tcp.SrcPort == 22000 or tcp.SrcPort == 22001)";
 			string connectFilter = "tcp.PayloadLength > 0";
-			string filter = portsFilter + " and " + connectFilter;
+			string filter = $"({userFilter}) and {connectFilter}";
 			
 			IResponse response = sharpDivert.Open(filter);
 			if (!response.IsSuccessful)
@@ -48,9 +63,9 @@ namespace PacketSniffer
 		private bool StartIntercepting()
 		{
 			IReceiveResponse message;
-			isIntercepting = WorkerStatus.Active;
+			status = WorkerStatus.Active;
 
-			while (isIntercepting == WorkerStatus.Active)
+			while (status == WorkerStatus.Active)
 			{
 				try
 				{
@@ -59,14 +74,14 @@ namespace PacketSniffer
                 }
 				catch (Exception e)
 				{
-					Console.WriteLine(e.Message);
-					isIntercepting = WorkerStatus.Inactive;
+					status = WorkerStatus.Inactive;
+					exceptionMessage = e.Message;
 
 					return false;
 				}
 			}
 
-			isIntercepting = WorkerStatus.Inactive;
+			status = WorkerStatus.Inactive;
 
 			return true;
 		}
@@ -75,25 +90,26 @@ namespace PacketSniffer
 		{
 			IMessage message = new Message(packet);
 			Console.WriteLine(message);
-
 			sharpDivert.SharpDivertSend(message.Packet, message.Address);
 		}
 
 		public void StopIntercepting()
 		{
-			isIntercepting = WorkerStatus.ShuttingDown;
+			if(status != WorkerStatus.Active)
+			{
+                Console.WriteLine("Intercepting not started!");
 
-			while (isIntercepting != WorkerStatus.Inactive)
+                return;
+			}
+
+			status = WorkerStatus.ShuttingDown;
+			sharpDivert.ShutdownHandle();
+			sharpDivert.CloseHandle();
+
+			while (status != WorkerStatus.Inactive)
 			{
 				Thread.Sleep(0);
 			}
-
-			Console.WriteLine("Stopped intercepting requests...");
-		}
-
-		public void InterceptAndAddToQueue()
-		{
-			throw new NotImplementedException();
 		}
 	}
 }

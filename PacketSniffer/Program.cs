@@ -1,5 +1,4 @@
 ﻿using System;
-using MySharpDivert;
 
 namespace PacketSniffer
 {

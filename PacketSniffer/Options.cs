@@ -1,6 +1,7 @@
 ﻿using MySharpDivert;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace PacketSniffer
@@ -13,12 +14,17 @@ namespace PacketSniffer
 
 		Dictionary<InputAction, Action> actions = new Dictionary<InputAction, Action>();
 
+		List<string> inputArgs;
+
 		public Options()
 		{
 			interceptor = new Interceptor(sharpDivertApi);
 			actions.Add(InputAction.Invalid, () => { DisplayMenu(); });
-			actions.Add(InputAction.Intercept, () => { InterceptAndForward(); });
-			actions.Add(InputAction.StopIntercepting, () => { StopIntercepting(); });
+			actions.Add(InputAction.Forward, () => { InterceptAndForward(); });
+			actions.Add(InputAction.Modify, () => { InterceptAndModify(); });
+			actions.Add(InputAction.Stop, () => { StopIntercepting(); });
+			actions.Add(InputAction.Menu, () => { DisplayMenu(); });
+			actions.Add(InputAction.Cls, () => { ClearConsole(); });
 		}
 
 		public void Begin()
@@ -39,38 +45,50 @@ namespace PacketSniffer
 
 		private InputAction ReadInput()
 		{
-			string line = Console.ReadLine();
-			if(!Enum.TryParse(line, out InputAction action))
+			string[] input = Console.ReadLine().Trim().Split(' ');
+			string command = input[0].ToLower();
+			if (!Enum.TryParse(command, true, out InputAction action))
 			{
 				return InputAction.Invalid;
 			}
+
+			inputArgs = input.Skip(1).ToList(); // Get arguments.
+			inputArgs.RemoveAll(string.IsNullOrWhiteSpace); // Remove white spaces and empty strings from arguments.
 
 			return action;
 		}
 
 		public void InterceptAndForward()
 		{
-			Task.Run(() => { interceptor.InterceptAndForward(); });
-		}
-
-		public void StopIntercepting()
-		{
-			Console.WriteLine("Waiting for interception to stop...");
-			interceptor.StopIntercepting();
-			Console.WriteLine("Successfully stopped.");
+			string filter = string.Join(' ', inputArgs);
+			Task.Run(() => { interceptor.InterceptAndForward(filter); });
 		}
 
 		public void InterceptAndModify()
 		{
-			throw new NotImplementedException();
+			Console.WriteLine("NOT IMPLEMENTED!");
+		}
+
+		public void StopIntercepting()
+		{
+			interceptor.StopIntercepting();
+		}
+
+		public void ClearConsole()
+		{
+			Console.Clear();
 		}
 
 		private void DisplayMenu()
 		{
-			Console.WriteLine("Press:\n\t* 1 to intercept and forward messages." +
-				"\n\t* Press -1 to stop." +
-				"\n\t* Press 0 to exit." +
-				"\n\t* Press any other key for menu.");
+			Console.WriteLine(
+				"- - - - - - - - - -  M E N U  - - - - - - - - - -\n" +
+				"Intercept and forward: \"forward {filter}\"\n" +
+				//"Intercept, modify and forward: \"modify {filter}\"\n" +
+				"Stop intercepting: \"stop\"\n" +
+				"Menu: \"menu\"\n" +
+				"Clear console: \"cls\"\n" +
+				"- - - - - - - - - - - - - - - - - - - - - - - - -");
 		}
 	}
 }

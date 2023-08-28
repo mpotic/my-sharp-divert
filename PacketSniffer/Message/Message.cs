@@ -11,16 +11,24 @@ namespace PacketSniffer
 	{
 		public Message(IReceiveResponse receiveResponse)
 		{
+			if (!Encoding.UTF8.GetString(receiveResponse.Packet).Contains("//"))
+			{
+				Console.WriteLine("Unknown message structure.");
+				return;
+			}
+
+			Packet = new byte[receiveResponse.Packet.Length];
+			Array.Copy(receiveResponse.Packet, Packet, receiveResponse.Packet.Length);
+			
+			string strPacket = Encoding.UTF8.GetString(receiveResponse.Packet);
+            string strHeader = strPacket.Split("//")[0];
+			string strPayload = strPacket.Split("//")[1];
+
+			Header = Encoding.UTF8.GetBytes(strHeader);
+			Payload = Encoding.UTF8.GetBytes(strPayload);
 			Address = receiveResponse.Address;
 
-			Header = new byte[20];
-			Array.Copy(receiveResponse.Packet, Header, 20);
-
-			int payloadLength = receiveResponse.Packet.Length - 20;
-			Payload = new byte[payloadLength];
-			Array.Copy(receiveResponse.Packet, 20, Payload, 0, payloadLength);
-
-			if (Enum.TryParse(Encoding.UTF8.GetString(Payload).Split("//")[0].Split(';')[0], out FunctionCode funCode))
+			if (Enum.TryParse(strHeader.Split(';')[2], out FunctionCode funCode))
 			{
 				FuncCode = funCode;
 			}
@@ -38,19 +46,16 @@ namespace PacketSniffer
 
 		public byte[] Header { get; set; }
 
-		public byte[] Packet
-		{
-			get
-			{
-				return Header.Concat(Payload).ToArray();
-			}
-		}
+		public byte[] Packet { get; set; }
 
 		public override string ToString()
 		{
-			string stringRepresentation = $"Function code: {FuncCode.ToString("X")} ({FuncCode})\n" +
-				$"Header: 0x{BitConverter.ToString(Header)}\n" +
-				$"Payload: {Encoding.UTF8.GetString(Payload)}";
+			string stringRepresentation =
+				"--------------------- MESSAGE ---------------------\n" +
+				$"Function code: 0x{FuncCode.ToString("X")} ({FuncCode})\n" +
+				$"Header: {Encoding.UTF8.GetString(Header)}\n" +
+				$"Payload: {Encoding.UTF8.GetString(Payload)}\n" +
+				"---------------------------------------------------";
 
 			return stringRepresentation;
 		}

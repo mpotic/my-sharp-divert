@@ -1,6 +1,4 @@
-﻿using System.Threading.Tasks;
-
-namespace PacketSniffer
+﻿namespace PacketSniffer
 {
 	internal interface IOptions
 	{
