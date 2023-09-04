@@ -17,8 +17,8 @@
 			ErrorMessage = errorMessage;
 		}
 
-		public bool IsSuccessful { get; set; }
+		public bool IsSuccessful { get; }
 
-		public string ErrorMessage { get; set; }
+		public string ErrorMessage { get; }
 	}
 }

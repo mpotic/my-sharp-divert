@@ -61,12 +61,13 @@ namespace PacketSniffer
 		public void InterceptAndForward()
 		{
 			string filter = string.Join(' ', inputArgs);
-			Task.Run(() => { interceptor.InterceptAndForward(filter); });
+			Task.Run(() => { interceptor.PrepareInterception(filter, InterceptionMode.Forward); });
 		}
 
 		public void InterceptAndModify()
 		{
-			Console.WriteLine("NOT IMPLEMENTED!");
+			string filter = string.Join(' ', inputArgs);
+			Task.Run(() => { interceptor.PrepareInterception(filter, InterceptionMode.Modify); });
 		}
 
 		public void StopIntercepting()
@@ -84,7 +85,7 @@ namespace PacketSniffer
 			Console.WriteLine(
 				"- - - - - - - - - -  M E N U  - - - - - - - - - -\n" +
 				"Intercept and forward: \"forward {filter}\"\n" +
-				//"Intercept, modify and forward: \"modify {filter}\"\n" +
+				"Intercept, modify and forward: \"modify {filter}\"\n" +
 				"Stop intercepting: \"stop\"\n" +
 				"Menu: \"menu\"\n" +
 				"Clear console: \"cls\"\n" +

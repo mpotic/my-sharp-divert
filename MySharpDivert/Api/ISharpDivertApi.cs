@@ -1,4 +1,5 @@
 ﻿using MySharpDivert.Native;
+using MySharpDivert.Native.Enums;
 
 namespace MySharpDivert
 {
@@ -6,12 +7,14 @@ namespace MySharpDivert
 	{
 		IResponse Open(string filter);
 
-		IReceiveResponse ReceiveSinglePacket();
+		PacketResponse ReceiveSinglePacket();
 
-		IResponse SharpDivertSend(byte[] packet, WinDivertAddress address);
+		IResponse SendSinglePacket(byte[] packet, WinDivertAddress address);
 
 		IResponse CloseHandle();
 
 		IResponse ShutdownHandle();
+
+		IPacketResponse CalculateChecksum(byte[] packet, WinDivertAddress address, ChecksumCalcFlags flags);
 	}
 }

@@ -1,5 +1,6 @@
 ﻿using MySharpDivert;
 using PacketSniffer.Enums;
+using PacketSniffer.Workers;
 using System;
 using System.Threading;
 
@@ -7,28 +8,56 @@ namespace PacketSniffer
 {
 	internal class Interceptor : IInterceptor
 	{
-		ISharpDivertApi sharpDivert;
+		readonly ISharpDivertApi sharpDivert;
 
 		WorkerStatus status = WorkerStatus.Inactive;
+
+		IInterceptionProcessor processor;
 
 		string exceptionMessage;
 
 		public Interceptor(ISharpDivertApi sharpDivert)
 		{
 			this.sharpDivert = sharpDivert;
+			processor = new Forwarder(sharpDivert);
 		}
 
-		public void InterceptAndForward(string filter)
+		public bool SetInterceptionMode(InterceptionMode mode)
 		{
-			if(status != WorkerStatus.Inactive)
+			try
 			{
-                Console.WriteLine("Already intercepting!");
+				processor = mode == InterceptionMode.Modify ? new Modifier(sharpDivert) : new Forwarder(sharpDivert);
+			}
+			catch (Exception ex)
+			{
+				exceptionMessage = ex.Message;
 
-                return;
+				return false;
+			}
+
+			return true;
+		}
+
+		public void PrepareInterception(string filter, InterceptionMode mode)
+		{
+			if (status != WorkerStatus.Inactive)
+			{
+				Console.WriteLine("Already intercepting!");
+
+				return;
+			}
+
+			if (!SetInterceptionMode(mode))
+			{
+				Console.WriteLine("Failed to set interception mode! " + exceptionMessage);
+
+				return;
 			}
 
 			if (!Open(filter))
 			{
+				Console.WriteLine("Failed to open! " + exceptionMessage);
+
 				return;
 			}
 
@@ -48,11 +77,11 @@ namespace PacketSniffer
 		{
 			string connectFilter = "tcp.PayloadLength > 0";
 			string filter = $"({userFilter}) and {connectFilter}";
-			
+
 			IResponse response = sharpDivert.Open(filter);
 			if (!response.IsSuccessful)
 			{
-				Console.WriteLine("Failed: " + response.ErrorMessage);
+				exceptionMessage = response.ErrorMessage;
 
 				return false;
 			}
@@ -62,7 +91,7 @@ namespace PacketSniffer
 
 		private bool StartIntercepting()
 		{
-			IReceiveResponse message;
+			PacketResponse message;
 			status = WorkerStatus.Active;
 
 			while (status == WorkerStatus.Active)
@@ -70,8 +99,16 @@ namespace PacketSniffer
 				try
 				{
 					message = sharpDivert.ReceiveSinglePacket();
+
+					if (!message.IsSuccessful)  //Error with WinDivert => assume invalid packet and don't process it.
+					{
+						Console.WriteLine(message.ErrorMessage);
+
+						continue;
+					}
+
 					ProcessPacket(message);
-                }
+				}
 				catch (Exception e)
 				{
 					status = WorkerStatus.Inactive;
@@ -86,20 +123,36 @@ namespace PacketSniffer
 			return true;
 		}
 
-		private void ProcessPacket(IReceiveResponse packet)
+		private void ProcessPacket(PacketResponse packet)
 		{
-			IMessage message = new Message(packet);
-			Console.WriteLine(message);
-			sharpDivert.SharpDivertSend(message.Packet, message.Address);
+			try
+			{
+				IMessage message = new Message();
+				if (!message.PopulateMessage(packet))
+				{
+					throw new Exception("Parsing failed.");
+				}
+				Console.WriteLine(message);
+				processor.ProcessInterceptedMessage(message);
+			}
+			catch (Exception e)
+			{
+				if (packet.Packet != null)
+				{
+					sharpDivert.SendSinglePacket(packet.Packet, packet.Address);
+				}
+
+				Console.WriteLine(e.Message);
+			}
 		}
 
 		public void StopIntercepting()
 		{
-			if(status != WorkerStatus.Active)
+			if (status != WorkerStatus.Active)
 			{
-                Console.WriteLine("Intercepting not started!");
+				Console.WriteLine("Interception wasn't started!");
 
-                return;
+				return;
 			}
 
 			status = WorkerStatus.ShuttingDown;

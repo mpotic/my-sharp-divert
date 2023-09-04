@@ -2,7 +2,7 @@
 {
 	internal interface IInterceptor
 	{
-		void InterceptAndForward(string filter);
+		void PrepareInterception(string filter, InterceptionMode mode);
 
 		void StopIntercepting();
 	}

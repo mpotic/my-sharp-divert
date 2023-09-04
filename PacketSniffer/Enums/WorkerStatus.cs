@@ -1,6 +1,6 @@
 ﻿namespace PacketSniffer.Enums
 {
-	enum WorkerStatus
+	internal enum WorkerStatus
 	{
 		Active,
 		Inactive,

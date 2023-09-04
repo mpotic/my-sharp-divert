@@ -2,8 +2,8 @@
 {
     public interface IResponse
 	{
-		bool IsSuccessful { get; set; }
+		bool IsSuccessful { get; }
 
-		string ErrorMessage { get; set; }
+		string ErrorMessage { get; }
 	}
 }

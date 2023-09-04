@@ -2,8 +2,10 @@
 
 namespace MySharpDivert
 {
-	public interface IReceiveResponse : IResponse
+	public interface IPacketResponse : IResponse
 	{
+		HeadersData Headers { get; }
+
 		byte[] Packet { get; }
 
 		WinDivertAddress Address { get; }

@@ -48,23 +48,27 @@ namespace MySharpDivert.Native
 		[return: MarshalAs(UnmanagedType.Bool)]
 		public static extern bool WinDivertHelperParsePacket(
 			[In()] IntPtr pPacket,
-			uint packetLen,
-			ref IntPtr ppIpHdr,       // Pointer to IPv4Header*
-			ref IntPtr ppIpv6Hdr,     // Pointer to IPv6Header*
-			ref IntPtr ppIcmpHdr,     // Pointer to IcmpV4Header*
-			ref IntPtr ppIcmpv6Hdr,   // Pointer to IcmpV6Header*
-			ref IntPtr ppTcpHdr,      // Pointer to TcpHeader*
-			ref IntPtr ppUdpHdr,      // Pointer to UdpHeader*
-			ref IntPtr ppData,        // Pointer to byte*
-			ref uint pDataLen
+			[In()] uint packetLen,
+			[Optional][Out()] out IntPtr ppIpHdr,
+			[Optional][Out()] out IntPtr ppIpv6Hdr,
+			[Optional][Out()] out byte protocol,
+			[Optional][Out()] out IntPtr ppIcmpHdr,
+			[Optional][Out()] out IntPtr ppIcmpv6Hdr,
+			[Optional][Out()] out IntPtr ppTcpHdr,
+			[Optional][Out()] out IntPtr ppUdpHdr,
+			[Optional][Out()] out IntPtr ppData,
+			[Optional][Out()] out uint pDataLen,
+			[Optional][Out()] out IntPtr ppNext,
+			[Optional][Out()] out uint pNextLen
 		);
 
 		[DllImport(WIN_DIVERT_PATH, EntryPoint = "WinDivertHelperCalcChecksums", CallingConvention = CallingConvention.Cdecl, SetLastError = true)]
-		public static extern uint WinDivertHelperCalcChecksums(
-			IntPtr pPacket,
-			uint packetLen,
-			[In()] ref WinDivertAddress pAddr,
-			ulong flags
+		[return: MarshalAs(UnmanagedType.Bool)]
+		public static extern bool WinDivertHelperCalcChecksums(
+			[In()][Out()] IntPtr pPacket,
+			[In()] uint packetLen,
+			[Optional][Out()] out WinDivertAddress pAddr,
+			[In()] ulong flags
 		);
 	}
 }

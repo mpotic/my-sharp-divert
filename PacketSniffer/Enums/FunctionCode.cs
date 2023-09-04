@@ -8,6 +8,5 @@
 		ReadAnalogInputs = 0x04,
 		WriteHolding = 0x10,
 		WriteCoils = 0x0F,
-		Unknown = -1
 	}
 }

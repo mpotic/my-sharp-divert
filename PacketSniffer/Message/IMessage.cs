@@ -1,20 +1,29 @@
-﻿using MySharpDivert.Native;
+﻿using MySharpDivert;
+using MySharpDivert.Native;
 using PacketSniffer.Enums;
 
 namespace PacketSniffer
 {
 	internal interface IMessage
 	{
-		FunctionCode FuncCode { get; set; }
+		public WinDivertAddress Address { get; }
 
-		WinDivertAddress Address { get; set; }
+		public HeadersData TcpIpHeaderData { get; }
 
-		byte[] Payload { get; set; }
+		public byte[] TcpIpHeader { get; }
 
-		byte[] Header { get; set; }
-		
-		byte[] Packet { get; }
+		public byte[] Header { get; }
 
-		string ToString();
+		public byte[] Payload { get; }
+
+		public byte[] Packet { get; }
+
+		public FunctionCode FuncCode { get; }
+
+		public SenderCode Sender { get; }
+
+		public bool PopulateMessage(IPacketResponse receiveResponse);
+
+		string ToStringWithCustomTitle(string title);
 	}
 }

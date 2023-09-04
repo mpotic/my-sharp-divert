@@ -30,9 +30,9 @@ namespace MySharpDivert
 			return new Response(true);
 		}
 
-		public IReceiveResponse ReceivePacket()
+		public PacketResponse ReceivePacket()
 		{
-			IReceiveResponse response;
+			PacketResponse response;
 			bool isSuccessful;
 			uint allowedPacketLen = 8192;
 			IntPtr packetBuffer = Marshal.AllocHGlobal((int)allowedPacketLen);
@@ -48,23 +48,25 @@ namespace MySharpDivert
 					out receivedPacketLength,
 					out address
 				);
+
+				byte[] packet = helper.GetPacket(packetBuffer, receivedPacketLength);
+				HeadersData headers = helper.GetHeadersFromPacket(packetBuffer, receivedPacketLength);
+				response = new PacketResponse(packet, headers, address);
 			}
 			catch (Exception e)
 			{
-				response = new ReceiveResponse(false, e.Message);
+				response = new PacketResponse(false, e.Message);
 
 				return response;
 			}
 
 			if (!isSuccessful)
 			{
-				response = new ReceiveResponse(isSuccessful, helper.GetLastErrorMessage());
+				response = new PacketResponse(isSuccessful, helper.GetLastErrorMessage());
 
 				return response;
 			}
 
-			byte[] packet = helper.GetPacket(packetBuffer, receivedPacketLength);
-			response = new ReceiveResponse(packet, address);
 			Marshal.FreeHGlobal(packetBuffer);
 
 			return response;
@@ -72,6 +74,11 @@ namespace MySharpDivert
 
 		public IResponse SendPacket(byte[] packet, WinDivertAddress address)
 		{
+			if (packet == null || packet.Length < 0)
+			{
+				return new Response(false, "Packet can't be empty!");
+			}
+
 			IResponse response;
 			bool isSuccessful;
 			IntPtr packetPtr = Marshal.AllocHGlobal(packet.Length);
@@ -138,6 +145,38 @@ namespace MySharpDivert
 			}
 
 			return new Response(true);
+		}
+
+		public IPacketResponse CalculateChecksum(byte[] packet, WinDivertAddress address, ChecksumCalcFlags flags)
+		{
+			IPacketResponse response;
+
+			if (packet == null || packet.Length < 0)
+			{
+				return new PacketResponse(false, "Packet can't be empty!");
+			}
+
+			try
+			{
+				IntPtr packetPtr = Marshal.AllocHGlobal(packet.Length);
+				Marshal.Copy(packet, 0, packetPtr, packet.Length);
+
+				if (!WinDivertImports.WinDivertHelperCalcChecksums(packetPtr, (uint)packet.Length, out address, (ulong)flags))
+				{
+					return new PacketResponse(false, "SharpDivert couldn't calculate checksum! " + helper.GetLastErrorMessage());
+				}
+
+				packet = helper.GetPacket(packetPtr, (uint)packet.Length);
+				HeadersData headers = helper.GetHeadersFromPacket(packetPtr, (uint)packet.Length);
+				response = new PacketResponse(packet, headers, address);
+				Marshal.FreeHGlobal(packetPtr);
+			}
+			catch (Exception e)
+			{
+				return new PacketResponse(false, "SharpDivert couldn't calculate checksum! " + e.Message);
+			}
+
+			return response;
 		}
 
 		~SharpDivert()

@@ -3,25 +3,20 @@ using System.Text;
 
 namespace MySharpDivert
 {
-	public class ReceiveResponse : Response, IReceiveResponse
+	public class PacketResponse : Response, IPacketResponse
     {
-		public ReceiveResponse(bool isSuccessful) : base(isSuccessful)
+		public PacketResponse(bool isSuccessful, string errorMessage) : base(isSuccessful, errorMessage)
 		{
 		}
 
-		public ReceiveResponse(bool isSuccessful, string errorMessage) : base(isSuccessful, errorMessage)
-		{
-		}
-
-		public ReceiveResponse(byte[] packet) : base(true)
+		public PacketResponse(byte[] packet, HeadersData headers, WinDivertAddress winDivertAddress) : base(true)
 		{
 			Packet = packet;
-		}
-
-		public ReceiveResponse(byte[] packet, WinDivertAddress winDivertAddress) : this(packet)
-		{
+			Headers = headers;
 			Address = winDivertAddress;
 		}
+
+		public HeadersData Headers { get; internal set; }
 
 		public byte[] Packet { get; internal set; }
 

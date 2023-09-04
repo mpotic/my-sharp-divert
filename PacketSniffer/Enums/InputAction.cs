@@ -1,6 +1,6 @@
 ﻿namespace PacketSniffer
 {
-	enum InputAction
+	internal enum InputAction
 	{
 		Invalid,
 		Exit,

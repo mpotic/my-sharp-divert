@@ -1,6 +1,6 @@
 ﻿using System.Runtime.InteropServices;
 
-namespace MySharpDivert.Native.Structs.NetworkHeaders
+namespace MySharpDivert.Native
 {
 	/// <summary>
 	/// Represents a UDP header.
@@ -8,24 +8,12 @@ namespace MySharpDivert.Native.Structs.NetworkHeaders
 	[StructLayout(LayoutKind.Sequential)]
 	internal struct UdpHeader
 	{
-		/// <summary>
-		/// Gets or sets the source port.
-		/// </summary>
-		public ushort SrcPort;
+		internal ushort SrcPort;
 
-		/// <summary>
-		/// Gets or sets the destination port.
-		/// </summary>
-		public ushort DstPort;
+		internal ushort DstPort;
 
-		/// <summary>
-		/// Gets or sets the length.
-		/// </summary>
-		public ushort Length;
+		internal ushort Length;
 
-		/// <summary>
-		/// Gets or sets the checksum.
-		/// </summary>
-		public ushort Checksum;
+		internal ushort Checksum;
 	}
 }

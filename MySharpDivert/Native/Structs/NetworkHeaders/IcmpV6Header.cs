@@ -1,6 +1,6 @@
 ﻿using System.Runtime.InteropServices;
 
-namespace MySharpDivert.Native.Structs.IPStructs
+namespace MySharpDivert.Native
 {
 	/// <summary>
 	/// Represents an IPv6 Icmp header.
@@ -8,24 +8,12 @@ namespace MySharpDivert.Native.Structs.IPStructs
 	[StructLayout(LayoutKind.Sequential)]
 	internal struct IcmpV6Header
 	{
-		/// <summary>
-		/// Gets or sets the ICMP type.
-		/// </summary>
-		public byte Type;
+		internal byte type;
 
-		/// <summary>
-		/// Gets or sets the ICMP subtype.
-		/// </summary>
-		public byte Code;
+		internal byte code;
 
-		/// <summary>
-		/// Gets or sets the checksum.
-		/// </summary>
-		public ushort Checksum;
+		internal ushort checksum;
 
-		/// <summary>
-		/// Gets or sets the body.
-		/// </summary>
-		public uint Body;
+		internal uint body;
 	}
 }
