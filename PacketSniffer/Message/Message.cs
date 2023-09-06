@@ -193,9 +193,9 @@ namespace PacketSniffer
 				$"Payload: {GetPayloadStr}\n" +
 				TcpIpHeaderData.IPv4HeaderData +
 				TcpIpHeaderData.TcpHeaderData +
-				string.Join('-', new char[titleLine.Length - 1]);
+				string.Join('-', new char[titleLine.Length + 1].Select(x => ""));
 
-			WriteMessageToFile();
+            WriteMessageToFile();
 
 			return stringRepresentation;
 		}
